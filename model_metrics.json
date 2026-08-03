@@ -1,0 +1,23 @@
+{
+  "dataset": "combined XSS_dataset.csv + css1.csv (XSS only)",
+  "k": 3,
+  "foldAccuracies": [
+    0.9924981245311327,
+    0.9939984996249063,
+    0.992503748125937
+  ],
+  "meanAccuracy": 0.993000124093992,
+  "stdAccuracy": 0.0007059618411552169,
+  "confusion": {
+    "true_positives": 2125,
+    "true_negatives": 1847,
+    "false_positives": 12,
+    "false_negatives": 16,
+    "total_labeled": 4000,
+    "precision": 0.9943846513804399,
+    "recall": 0.9925268566090611,
+    "f1_score": 0.9934548854604955,
+    "accuracy": 0.993,
+    "model_used": true
+  }
+}

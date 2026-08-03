@@ -1,0 +1,17 @@
+{
+  "name": "xss-detection-system",
+  "version": "1.0.0",
+  "description": "Demonstrates XSS detection and prevention.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "ejs": "^3.1.9",
+    "sqlite3": "^5.1.6",
+    "body-parser": "^1.20.2",
+    "ml-random-forest": "^2.0.0",
+    "ml-matrix": "^6.10.6"
+  }
+}
