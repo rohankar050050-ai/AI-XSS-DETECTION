@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XSS Attack Scanner</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        button {
+            flex: 1;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #333;
+            border: 2px solid #ddd;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+        }
+
+        .examples {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .examples h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .example-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .example-item {
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid #ddd;
+        }
+
+        .example-item:hover {
+            background: #e9ecef;
+            border-color: #667eea;
+        }
+
+        .example-item code {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #e74c3c;
+        }
+
+        .info-box {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            border-radius: 5px;
+        }
+
+        .info-box p {
+            color: #1976d2;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>XSS Attack Scanner</h1>
+            <p>Enter a command or payload to check for Cross-Site Scripting attacks</p>
+        </div>
+
+        <form id="scannerForm">
+            <div class="form-group">
+                <label for="inputCommand">Enter Command / Payload:</label>
+                <textarea 
+                    id="inputCommand" 
+                    name="command" 
+                    placeholder="Enter your input here... (e.g., &lt;script&gt;alert('XSS')&lt;/script&gt;)"
+                    required
+                ></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="groundTruth">Ground Truth (for FP/FN calculation):</label>
+                <select id="groundTruth" name="groundTruth" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 16px;">
+                    <option value="">Not specified (skip FP/FN calculation)</option>
+                    <option value="malicious">Malicious (this is a real XSS attack)</option>
+                    <option value="clean">Clean (this is safe input)</option>
+                </select>
+                <small style="color: #666; display: block; margin-top: 5px;">
+                    Select the actual nature of this input to calculate false positives/negatives
+                </small>
+            </div>
+
+            <div class="button-group">
+                <button type="submit" class="btn-primary">Scan for XSS Attack</button>
+                <button type="button" class="btn-secondary" onclick="window.location.href='/metrics'">View Metrics</button>
+            </div>
+        </form>
+
+        <div class="examples">
+            <h3>Example Payloads:</h3>
+            <div class="example-list">
+                <div class="example-item" onclick="loadExample(`<script>alert('XSS')</script>`, 'malicious')">
+                    <strong>Basic Script Tag:</strong> <code>&lt;script&gt;alert('XSS')&lt;/script&gt;</code>
+                </div>
+                <div class="example-item" onclick="loadExample(`<img src=x onerror=alert('XSS')>`, 'malicious')">
+                    <strong>Image onerror:</strong> <code>&lt;img src=x onerror=alert('XSS')&gt;</code>
+                </div>
+                <div class="example-item" onclick="loadExample(`<iframe src=javascript:alert('XSS')></iframe>`, 'malicious')">
+                    <strong>Iframe Attack:</strong> <code>&lt;iframe src=javascript:alert('XSS')&gt;&lt;/iframe&gt;</code>
+                </div>
+                <div class="example-item" onclick="loadExample(`<div onclick=alert('XSS')>Click me</div>`, 'malicious')">
+                    <strong>Event Handler:</strong> <code>&lt;div onclick=alert('XSS')&gt;Click me&lt;/div&gt;</code>
+                </div>
+                <div class="example-item" onclick="loadExample(`Hello World`, 'clean')">
+                    <strong>Clean Input:</strong> <code>Hello World</code>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <p>This scanner analyzes your input for common XSS attack patterns and provides detailed detection results.</p>
+        </div>
+    </div>
+
+    <script src="/scanner.js"></script>
+</body>
+</html>
+
